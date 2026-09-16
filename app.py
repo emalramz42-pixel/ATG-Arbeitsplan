@@ -29,8 +29,7 @@ WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
 SCHEMA_SQLITE = """
     CREATE TABLE IF NOT EXISTS mitarbeiter (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        aktiv INTEGER NOT NULL DEFAULT 1
+        name TEXT NOT NULL UNIQUE
     );
 
     CREATE TABLE IF NOT EXISTS schichten (
@@ -46,8 +45,7 @@ SCHEMA_SQLITE = """
 SCHEMA_POSTGRES = """
     CREATE TABLE IF NOT EXISTS mitarbeiter (
         id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL UNIQUE,
-        aktiv INTEGER NOT NULL DEFAULT 1
+        name TEXT NOT NULL UNIQUE
     );
 
     CREATE TABLE IF NOT EXISTS schichten (
@@ -229,7 +227,7 @@ def _admin_woche(woche):
     db = get_db()
 
     mitarbeiter = db.execute(
-        "SELECT id, name FROM mitarbeiter WHERE aktiv = 1 ORDER BY LOWER(name)"
+        "SELECT id, name FROM mitarbeiter ORDER BY LOWER(name)"
     ).fetchall()
 
     zugewiesen = db.execute(
@@ -298,7 +296,7 @@ def mitarbeiter_hinzufuegen():
 def mitarbeiter_entfernen(mitarbeiter_id):
     woche = request.form.get("woche") or montag_der_woche(date.today()).isoformat()
     db = get_db()
-    db.execute("UPDATE mitarbeiter SET aktiv = 0 WHERE id = ?", (mitarbeiter_id,))
+    db.execute("DELETE FROM mitarbeiter WHERE id = ?", (mitarbeiter_id,))
     db.commit()
     return redirect(url_for("admin_woche_view", woche=woche))
 
