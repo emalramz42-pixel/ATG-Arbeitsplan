@@ -3,7 +3,7 @@ import sqlite3
 from datetime import date, timedelta
 from functools import wraps
 
-from flask import Flask, g, redirect, render_template, request, session, url_for
+from flask import Flask, g, redirect, render_template, request, send_from_directory, session, url_for
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "arbeitsplan.db")
@@ -144,6 +144,16 @@ def inject_globals():
 def index():
     heute = date.today()
     return redirect(url_for("woche_ansehen", woche=montag_der_woche(heute).isoformat()))
+
+
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+
+
+@app.route("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
 
 
 @app.route("/woche/<woche>")
