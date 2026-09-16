@@ -8,6 +8,17 @@ from flask import Flask, g, redirect, render_template, request, session, url_for
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "arbeitsplan.db")
 
+DATABASE_URL = os.environ.get("DATABASE_URL")
+USE_POSTGRES = bool(DATABASE_URL)
+
+if USE_POSTGRES:
+    import psycopg2
+    import psycopg2.extras
+
+    INTEGRITY_ERRORS = (psycopg2.IntegrityError,)
+else:
+    INTEGRITY_ERRORS = (sqlite3.IntegrityError,)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "bitte-in-produktion-aendern")
 
@@ -15,12 +26,70 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "chef123")
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
 
+SCHEMA_SQLITE = """
+    CREATE TABLE IF NOT EXISTS mitarbeiter (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        aktiv INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS schichten (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        mitarbeiter_id INTEGER NOT NULL REFERENCES mitarbeiter(id) ON DELETE CASCADE,
+        woche_start TEXT NOT NULL,
+        wochentag INTEGER NOT NULL,
+        notiz TEXT DEFAULT '',
+        UNIQUE(mitarbeiter_id, woche_start, wochentag)
+    );
+"""
+
+SCHEMA_POSTGRES = """
+    CREATE TABLE IF NOT EXISTS mitarbeiter (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        aktiv INTEGER NOT NULL DEFAULT 1
+    );
+
+    CREATE TABLE IF NOT EXISTS schichten (
+        id SERIAL PRIMARY KEY,
+        mitarbeiter_id INTEGER NOT NULL REFERENCES mitarbeiter(id) ON DELETE CASCADE,
+        woche_start TEXT NOT NULL,
+        wochentag INTEGER NOT NULL,
+        notiz TEXT DEFAULT '',
+        UNIQUE(mitarbeiter_id, woche_start, wochentag)
+    );
+"""
+
+
+class PostgresConnection:
+    """Duenner Wrapper, der psycopg2 wie sqlite3.Connection benutzbar macht."""
+
+    def __init__(self, dsn):
+        self._conn = psycopg2.connect(dsn, cursor_factory=psycopg2.extras.RealDictCursor)
+
+    def execute(self, sql, params=()):
+        cur = self._conn.cursor()
+        cur.execute(sql.replace("?", "%s"), params)
+        return cur
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
+
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA foreign_keys = ON")
+        if USE_POSTGRES:
+            g.db = PostgresConnection(DATABASE_URL)
+        else:
+            g.db = sqlite3.connect(DB_PATH)
+            g.db.row_factory = sqlite3.Row
+            g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
 
@@ -32,27 +101,16 @@ def close_db(exception=None):
 
 
 def init_db():
-    db = sqlite3.connect(DB_PATH)
-    db.executescript(
-        """
-        CREATE TABLE IF NOT EXISTS mitarbeiter (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            aktiv INTEGER NOT NULL DEFAULT 1
-        );
-
-        CREATE TABLE IF NOT EXISTS schichten (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mitarbeiter_id INTEGER NOT NULL REFERENCES mitarbeiter(id) ON DELETE CASCADE,
-            woche_start TEXT NOT NULL,
-            wochentag INTEGER NOT NULL,
-            notiz TEXT DEFAULT '',
-            UNIQUE(mitarbeiter_id, woche_start, wochentag)
-        );
-        """
-    )
-    db.commit()
-    db.close()
+    if USE_POSTGRES:
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.cursor().execute(SCHEMA_POSTGRES)
+        conn.commit()
+        conn.close()
+    else:
+        conn = sqlite3.connect(DB_PATH)
+        conn.executescript(SCHEMA_SQLITE)
+        conn.commit()
+        conn.close()
 
 
 def montag_der_woche(bezugstag: date) -> date:
@@ -102,7 +160,7 @@ def woche_ansehen(woche):
             FROM schichten s
             JOIN mitarbeiter m ON m.id = s.mitarbeiter_id
             WHERE s.woche_start = ? AND s.wochentag = ?
-            ORDER BY m.name COLLATE NOCASE
+            ORDER BY LOWER(m.name)
             """,
             (woche_start.isoformat(), i),
         ).fetchall()
@@ -161,7 +219,7 @@ def _admin_woche(woche):
     db = get_db()
 
     mitarbeiter = db.execute(
-        "SELECT id, name FROM mitarbeiter WHERE aktiv = 1 ORDER BY name COLLATE NOCASE"
+        "SELECT id, name FROM mitarbeiter WHERE aktiv = 1 ORDER BY LOWER(name)"
     ).fetchall()
 
     zugewiesen = db.execute(
@@ -220,8 +278,8 @@ def mitarbeiter_hinzufuegen():
         try:
             db.execute("INSERT INTO mitarbeiter (name) VALUES (?)", (name,))
             db.commit()
-        except sqlite3.IntegrityError:
-            pass
+        except INTEGRITY_ERRORS:
+            db.rollback()
     return redirect(url_for("admin_woche_view", woche=woche))
 
 
