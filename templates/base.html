@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Arbeitsplan{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="logo" href="{{ url_for('index') }}">📅 Arbeitsplan</a>
+        <nav>
+            {% if is_admin %}
+                <a href="{{ url_for('admin_woche') }}">Bearbeiten</a>
+                <a href="{{ url_for('admin_logout') }}">Abmelden</a>
+            {% else %}
+                <a href="{{ url_for('admin_login') }}">Chef-Login</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

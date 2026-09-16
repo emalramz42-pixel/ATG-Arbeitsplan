@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Arbeitsplan{% endblock %}
+
+{% block content %}
+    <div class="woche-header">
+        <a class="nav-btn" href="{{ url_for('woche_ansehen', woche=vorherige_woche) }}">&larr; Vorherige Woche</a>
+        <h1>
+            {{ woche_start.strftime('%d.%m.%Y') }} &ndash; {{ woche_ende.strftime('%d.%m.%Y') }}
+            {% if woche_start.isoformat() == heute_woche %}<span class="badge">Diese Woche</span>{% endif %}
+        </h1>
+        <a class="nav-btn" href="{{ url_for('woche_ansehen', woche=naechste_woche) }}">Nächste Woche &rarr;</a>
+    </div>
+
+    <div class="tage-grid">
+        {% for tag in tage %}
+            <div class="tag-karte">
+                <h2>{{ tag.name }}<span class="datum">{{ tag.datum.strftime('%d.%m.') }}</span></h2>
+                {% if tag.eintraege %}
+                    <ul class="mitarbeiter-liste">
+                        {% for e in tag.eintraege %}
+                            <li>{{ e.name }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="leer">Niemand eingetragen</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

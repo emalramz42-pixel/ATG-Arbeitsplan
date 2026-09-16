@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Arbeitsplan bearbeiten{% endblock %}
+
+{% block content %}
+    <div class="woche-header">
+        <a class="nav-btn" href="{{ url_for('admin_woche_view', woche=vorherige_woche) }}">&larr; Vorherige Woche</a>
+        <h1>
+            Woche vom {{ woche_start.strftime('%d.%m.%Y') }}
+            {% if woche_start.isoformat() == heute_woche %}<span class="badge">Diese Woche</span>{% endif %}
+        </h1>
+        <a class="nav-btn" href="{{ url_for('admin_woche_view', woche=naechste_woche) }}">Nächste Woche &rarr;</a>
+    </div>
+
+    <p class="ansicht-link">
+        <a href="{{ url_for('woche_ansehen', woche=woche_start.isoformat()) }}" target="_blank">Ansicht für Mitarbeiter öffnen &#8599;</a>
+    </p>
+
+    {% if mitarbeiter %}
+    <form method="post" action="{{ url_for('admin_woche_speichern', woche=woche_start.isoformat()) }}">
+        <div class="tabelle-wrapper">
+            <table class="plan-tabelle">
+                <thead>
+                    <tr>
+                        <th>Mitarbeiter</th>
+                        {% for tag in tage %}
+                            <th>{{ tag.name }}<br><span class="datum">{{ tag.datum.strftime('%d.%m.') }}</span></th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mitarbeiter %}
+                        <tr>
+                            <td class="name-zelle">{{ m.name }}</td>
+                            {% for tag in tage %}
+                                <td class="check-zelle">
+                                    <input type="checkbox"
+                                           name="schicht_{{ m.id }}_{{ tag.index }}"
+                                           {% if (m.id, tag.index) in zugewiesen_set %}checked{% endif %}>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <button type="submit" class="speichern-btn">Woche speichern</button>
+    </form>
+    {% else %}
+        <p class="leer">Noch keine Mitarbeiter angelegt. Füge unten den ersten hinzu.</p>
+    {% endif %}
+
+    <section class="mitarbeiter-verwaltung">
+        <h2>Mitarbeiter verwalten</h2>
+        <form method="post" action="{{ url_for('mitarbeiter_hinzufuegen') }}" class="inline-form">
+            <input type="hidden" name="woche" value="{{ woche_start.isoformat() }}">
+            <input type="text" name="name" placeholder="Name des Mitarbeiters" required>
+            <button type="submit">Hinzufügen</button>
+        </form>
+
+        {% if mitarbeiter %}
+        <ul class="mitarbeiter-verwaltung-liste">
+            {% for m in mitarbeiter %}
+                <li>
+                    {{ m.name }}
+                    <form method="post" action="{{ url_for('mitarbeiter_entfernen', mitarbeiter_id=m.id) }}" class="inline-form">
+                        <input type="hidden" name="woche" value="{{ woche_start.isoformat() }}">
+                        <button type="submit" class="entfernen-btn" onclick="return confirm('{{ m.name }} wirklich entfernen?')">Entfernen</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </section>
+{% endblock %}

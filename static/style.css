@@ -1,0 +1,279 @@
+:root {
+    --blau: #2563eb;
+    --blau-dunkel: #1e40af;
+    --grau-hell: #f4f6f8;
+    --grau: #6b7280;
+    --grau-rand: #e2e8f0;
+    --rot: #dc2626;
+    --gruen: #16a34a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--grau-hell);
+    color: #1f2937;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--grau-rand);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.topbar .logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--blau-dunkel);
+    text-decoration: none;
+}
+
+.topbar nav a {
+    margin-left: 16px;
+    color: var(--blau);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+}
+
+.woche-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.woche-header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.badge {
+    display: inline-block;
+    background: var(--blau);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.nav-btn {
+    color: var(--blau);
+    text-decoration: none;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.tage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.tag-karte {
+    background: white;
+    border: 1px solid var(--grau-rand);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.tag-karte h2 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    color: var(--blau-dunkel);
+}
+
+.tag-karte .datum {
+    color: var(--grau);
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+.mitarbeiter-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mitarbeiter-liste li {
+    padding: 6px 0;
+    border-top: 1px solid var(--grau-rand);
+    font-size: 0.95rem;
+}
+
+.mitarbeiter-liste li:first-child { border-top: none; }
+
+.leer {
+    color: var(--grau);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.login-box {
+    max-width: 320px;
+    margin: 60px auto;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--grau-rand);
+}
+
+.login-box h1 { font-size: 1.2rem; margin-top: 0; }
+
+.login-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-box input {
+    padding: 10px;
+    border: 1px solid var(--grau-rand);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.login-box button,
+.speichern-btn,
+.inline-form button {
+    background: var(--blau);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-box button:hover,
+.speichern-btn:hover,
+.inline-form button:hover {
+    background: var(--blau-dunkel);
+}
+
+.fehler { color: var(--rot); font-size: 0.9rem; }
+
+.ansicht-link { margin-bottom: 16px; }
+.ansicht-link a { color: var(--blau); font-weight: 600; text-decoration: none; }
+
+.tabelle-wrapper {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid var(--grau-rand);
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.plan-tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 480px;
+}
+
+.plan-tabelle th, .plan-tabelle td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--grau-rand);
+    font-size: 0.9rem;
+}
+
+.plan-tabelle th .datum {
+    display: block;
+    font-weight: 400;
+    color: var(--grau);
+    font-size: 0.75rem;
+}
+
+.name-zelle {
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.check-zelle input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.speichern-btn {
+    padding: 12px 20px;
+    width: 100%;
+}
+
+.mitarbeiter-verwaltung {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--grau-rand);
+}
+
+.mitarbeiter-verwaltung h2 {
+    font-size: 1.05rem;
+}
+
+.inline-form {
+    display: inline-flex;
+    gap: 8px;
+    margin: 0;
+}
+
+.mitarbeiter-verwaltung > .inline-form {
+    margin-bottom: 16px;
+}
+
+.mitarbeiter-verwaltung > .inline-form input {
+    padding: 8px 10px;
+    border: 1px solid var(--grau-rand);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.mitarbeiter-verwaltung-liste {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mitarbeiter-verwaltung-liste li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border: 1px solid var(--grau-rand);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.entfernen-btn {
+    background: transparent !important;
+    color: var(--rot) !important;
+    font-size: 0.8rem;
+    padding: 4px 8px !important;
+}
