@@ -6,7 +6,11 @@
         <a class="nav-btn" href="{{ url_for('admin_woche_view', woche=vorherige_woche) }}">&larr; Vorherige Woche</a>
         <h1>
             Woche vom {{ woche_start.strftime('%d.%m.%Y') }}
-            {% if woche_start.isoformat() == heute_woche %}<span class="badge">Diese Woche</span>{% endif %}
+            {% if woche_start.isoformat() == heute_woche %}
+                <span class="badge">Diese Woche</span>
+            {% else %}
+                <a class="heute-btn" href="{{ url_for('admin_woche_view', woche=heute_woche) }}">Zur aktuellen Woche</a>
+            {% endif %}
         </h1>
         <a class="nav-btn" href="{{ url_for('admin_woche_view', woche=naechste_woche) }}">Nächste Woche &rarr;</a>
     </div>
