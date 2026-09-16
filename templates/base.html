@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Arbeitsplan{% endblock %}</title>
+    <meta name="theme-color" content="#3e6e78">
+    <title>{% block title %}ATG Arbeitsplan{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="topbar">
-        <a class="logo" href="{{ url_for('index') }}">📅 Arbeitsplan</a>
+        <a class="logo" href="{{ url_for('index') }}">
+            <span class="logo-mark">ATG</span>
+            <span class="logo-text">Arbeitsplan</span>
+        </a>
         <nav>
             {% if is_admin %}
                 <a href="{{ url_for('admin_woche') }}">Bearbeiten</a>
