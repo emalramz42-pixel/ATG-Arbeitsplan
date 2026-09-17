@@ -26,6 +26,8 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "chef123")
 
 WOCHENTAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"]
 
+TOUREN = {"KS": "Kassel-Tour", "BA": "Baunatal-Tour"}
+
 SCHEMA_SQLITE = """
     CREATE TABLE IF NOT EXISTS mitarbeiter (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -164,7 +166,7 @@ def woche_ansehen(woche):
         tag_datum = woche_start + timedelta(days=i)
         eintraege = db.execute(
             """
-            SELECT m.name AS name, s.notiz AS notiz
+            SELECT m.name AS name, s.notiz AS tour
             FROM schichten s
             JOIN mitarbeiter m ON m.id = s.mitarbeiter_id
             WHERE s.woche_start = ? AND s.wochentag = ?
@@ -172,11 +174,16 @@ def woche_ansehen(woche):
             """,
             (woche_start.isoformat(), i),
         ).fetchall()
-        tage.append({"name": name, "datum": tag_datum, "eintraege": eintraege})
+        touren = {
+            code: [e["name"] for e in eintraege if e["tour"] == code]
+            for code in TOUREN
+        }
+        tage.append({"name": name, "datum": tag_datum, "eintraege": eintraege, "touren": touren})
 
     return render_template(
         "view.html",
         tage=tage,
+        touren=TOUREN,
         woche_start=woche_start,
         woche_ende=woche_start + timedelta(days=4),
         vorherige_woche=(woche_start - timedelta(days=7)).isoformat(),
@@ -231,10 +238,10 @@ def _admin_woche(woche):
     ).fetchall()
 
     zugewiesen = db.execute(
-        "SELECT mitarbeiter_id, wochentag FROM schichten WHERE woche_start = ?",
+        "SELECT mitarbeiter_id, wochentag, notiz AS tour FROM schichten WHERE woche_start = ?",
         (woche_start.isoformat(),),
     ).fetchall()
-    zugewiesen_set = {(row["mitarbeiter_id"], row["wochentag"]) for row in zugewiesen}
+    zugewiesen_touren = {(row["mitarbeiter_id"], row["wochentag"]): row["tour"] for row in zugewiesen}
 
     tage = [
         {"index": i, "name": name, "datum": woche_start + timedelta(days=i)}
@@ -245,7 +252,8 @@ def _admin_woche(woche):
         "admin.html",
         mitarbeiter=mitarbeiter,
         tage=tage,
-        zugewiesen_set=zugewiesen_set,
+        touren=TOUREN,
+        zugewiesen_touren=zugewiesen_touren,
         woche_start=woche_start,
         vorherige_woche=(woche_start - timedelta(days=7)).isoformat(),
         naechste_woche=(woche_start + timedelta(days=7)).isoformat(),
@@ -265,11 +273,12 @@ def admin_woche_speichern(woche):
 
     for mid in mitarbeiter_ids:
         for tag_index in range(5):
-            feld = f"schicht_{mid}_{tag_index}"
-            if request.form.get(feld):
+            feld = f"tour_{mid}_{tag_index}"
+            tour = request.form.get(feld, "")
+            if tour in TOUREN:
                 db.execute(
-                    "INSERT INTO schichten (mitarbeiter_id, woche_start, wochentag) VALUES (?, ?, ?)",
-                    (mid, woche_start.isoformat(), tag_index),
+                    "INSERT INTO schichten (mitarbeiter_id, woche_start, wochentag, notiz) VALUES (?, ?, ?, ?)",
+                    (mid, woche_start.isoformat(), tag_index, tour),
                 )
     db.commit()
 

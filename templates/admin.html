@@ -20,6 +20,11 @@
     </p>
 
     {% if mitarbeiter %}
+    <p class="touren-legende">
+        {% for code, label in touren.items() %}
+            <span class="tour-badge tour-badge-{{ code|lower }}">{{ code }}</span> {{ label }}
+        {% endfor %}
+    </p>
     <form method="post" action="{{ url_for('admin_woche_speichern', woche=woche_start.isoformat()) }}">
         <div class="tabelle-wrapper">
             <table class="plan-tabelle">
@@ -36,10 +41,14 @@
                         <tr>
                             <td class="name-zelle">{{ m.name }}</td>
                             {% for tag in tage %}
-                                <td class="check-zelle">
-                                    <input type="checkbox"
-                                           name="schicht_{{ m.id }}_{{ tag.index }}"
-                                           {% if (m.id, tag.index) in zugewiesen_set %}checked{% endif %}>
+                                {% set aktuelle_tour = zugewiesen_touren.get((m.id, tag.index), "") %}
+                                <td class="tour-zelle">
+                                    <select name="tour_{{ m.id }}_{{ tag.index }}" class="tour-select tour-select-{{ aktuelle_tour|lower or 'leer' }}">
+                                        <option value="" {% if not aktuelle_tour %}selected{% endif %}>–</option>
+                                        {% for code, label in touren.items() %}
+                                            <option value="{{ code }}" {% if aktuelle_tour == code %}selected{% endif %}>{{ code }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </td>
                             {% endfor %}
                         </tr>

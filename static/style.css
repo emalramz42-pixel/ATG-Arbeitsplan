@@ -6,6 +6,8 @@
     --grau: #64748b;
     --grau-rand: #dbe6e7;
     --rot: #dc2626;
+    --ba: #b8622a;
+    --ba-hell: #fbeee3;
 }
 
 * { box-sizing: border-box; }
@@ -200,6 +202,57 @@ body {
     font-style: italic;
 }
 
+.tour-block {
+    margin-bottom: 12px;
+}
+
+.tour-block:last-child {
+    margin-bottom: 0;
+}
+
+.tour-block .leer {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+}
+
+.tour-block .mitarbeiter-liste {
+    margin-top: 4px;
+}
+
+.tour-label {
+    font-size: 0.8rem;
+    color: var(--grau);
+    font-weight: 600;
+}
+
+.tour-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 5px;
+}
+
+.tour-badge-ks {
+    background: var(--teal);
+}
+
+.tour-badge-ba {
+    background: var(--ba);
+}
+
+.touren-legende {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--grau);
+    margin: -6px 0 16px;
+}
+
 .login-box {
     max-width: 320px;
     margin: 60px auto;
@@ -294,11 +347,31 @@ body {
     color: var(--tinte);
 }
 
-.check-zelle input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+.tour-select {
+    width: 100%;
+    min-width: 64px;
+    padding: 6px 4px;
+    border-radius: 6px;
+    border: 1px solid var(--grau-rand);
+    background: white;
+    color: var(--tinte);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-align: center;
+    text-align-last: center;
     cursor: pointer;
-    accent-color: var(--teal);
+}
+
+.tour-select-ks {
+    background: var(--teal-hell);
+    border-color: var(--teal);
+    color: var(--teal-dunkel);
+}
+
+.tour-select-ba {
+    background: var(--ba-hell);
+    border-color: var(--ba);
+    color: var(--ba);
 }
 
 .speichern-btn {

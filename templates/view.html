@@ -20,11 +20,21 @@
             <div class="tag-karte">
                 <h2>{{ tag.name }}<span class="datum">{{ tag.datum.strftime('%d.%m.') }}</span></h2>
                 {% if tag.eintraege %}
-                    <ul class="mitarbeiter-liste">
-                        {% for e in tag.eintraege %}
-                            <li>{{ e.name }}</li>
-                        {% endfor %}
-                    </ul>
+                    {% for code, label in touren.items() %}
+                        <div class="tour-block">
+                            <span class="tour-badge tour-badge-{{ code|lower }}">{{ code }}</span>
+                            <span class="tour-label">{{ label }}</span>
+                            {% if tag.touren[code] %}
+                                <ul class="mitarbeiter-liste">
+                                    {% for name in tag.touren[code] %}
+                                        <li>{{ name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="leer">– niemand</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                 {% else %}
                     <p class="leer">Niemand eingetragen</p>
                 {% endif %}
